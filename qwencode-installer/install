@@ -1,25 +1,14 @@
 #!/bin/bash
 #
 # Qwen Code Universal Installer
-# One command for all platforms: macOS, Linux, Windows (Git Bash/WSL/Cygwin)
+# One command for all platforms - redirects to platform-specific installer
 #
 # Usage:
-#   curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install | bash
+#   curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install | bash
 #
-# The script will:
-# - Auto-detect the platform and run the appropriate installer
-# - On Windows: automatically invoke PowerShell to run the PS1 script
-# - On macOS/Linux: run the bash installer directly
-#
-# Options:
-#   --platform <name>   Force platform (mac, windows, linux)
-#   --skip-node         Skip Node.js installation
-#   --help              Show help
-#
-# Environment Variables:
-#   QWEN_INSTALL_DIR    Custom installation directory (default: ~/.qwen)
-#   QWEN_NODE_VERSION   Node.js version (default: 20.18.1)
-#   QWEN_NPM_REGISTRY   npm registry (default: https://registry.npmmirror.com)
+# This script detects your platform and runs the appropriate installer:
+# - macOS/Linux: Runs install-qwen.sh
+# - Windows: Runs install-qwen.bat
 #
 
 set -e
@@ -27,9 +16,6 @@ set -e
 # ============================================
 # Configuration
 # ============================================
-INSTALLER_VERSION="1.0.0"
-DEFAULT_NODE_VERSION="20.18.1"
-DEFAULT_NPM_REGISTRY="https://registry.npmmirror.com"
 BASE_URL="https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation"
 
 # ============================================
@@ -37,19 +23,15 @@ BASE_URL="https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation"
 # ============================================
 RED='\033[0;31m'
 GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-BOLD='\033[1m'
 NC='\033[0m'
 
 # ============================================
 # Logging
 # ============================================
-info()    { echo -e "${BLUE}ℹ️  $1${NC}"; }
+info() { echo -e "${BLUE}ℹ️  $1${NC}"; }
 success() { echo -e "${GREEN}✅ $1${NC}"; }
-warn()    { echo -e "${YELLOW}⚠️  $1${NC}"; }
-error()   { echo -e "${RED}❌ $1${NC}"; exit 1; }
+error() { echo -e "${RED}❌ $1${NC}"; exit 1; }
 
 # ============================================
 # Platform Detection
@@ -63,437 +45,85 @@ detect_platform() {
     esac
 }
 
-detect_arch() {
-    case "$(uname -m 2>/dev/null)" in
-        x86_64|amd64)   echo "x64" ;;
-        arm64|aarch64)  echo "arm64" ;;
-        *)              echo "unknown" ;;
-    esac
+# ============================================
+# macOS/Linux Installation
+# ============================================
+install_unix() {
+    info "Detected macOS/Linux, running bash installer..."
+    
+    # Download and execute the bash installer
+    bash -c "$(curl -fsSL ${BASE_URL}/install-qwen.sh)"
 }
 
 # ============================================
-# Check Node.js
-# ============================================
-check_node() {
-    if command -v node &>/dev/null; then
-        local version
-        version=$(node -v 2>/dev/null | sed 's/v//')
-        local major
-        major=$(echo "$version" | cut -d. -f1 | sed 's/[^0-9]//g')
-        [[ -n "$major" ]] && [[ "$major" -ge 20 ]] && return 0
-    fi
-    return 1
-}
-
-# ============================================
-# Install Node.js (Unix)
-# ============================================
-install_node_unix() {
-    local os="$1"
-    local arch=$(detect_arch)
-    local version="${QWEN_NODE_VERSION:-$DEFAULT_NODE_VERSION}"
-    local install_dir="${QWEN_INSTALL_DIR:-$HOME/.qwen}/node"
-
-    info "Installing Node.js v${version}..."
-
-    local archive_name="node-v${version}-${os}-${arch}"
-    [[ "$os" == "linux" ]] && [[ "$arch" == "arm64" ]] && archive_name="node-v${version}-${os}-${arch}-glibc"
-
-    local url="https://nodejs.org/dist/v${version}/${archive_name}.tar.gz"
-    local tmp_dir
-    tmp_dir=$(mktemp -d)
-
-    info "Downloading..."
-    if command -v curl &>/dev/null; then
-        curl -fsSL "$url" -o "${tmp_dir}/node.tar.gz" || {
-            rm -rf "$tmp_dir"
-            error "Download failed. Please check your internet connection."
-        }
-    elif command -v wget &>/dev/null; then
-        wget -q "$url" -O "${tmp_dir}/node.tar.gz" || {
-            rm -rf "$tmp_dir"
-            error "Download failed. Please check your internet connection."
-        }
-    else
-        error "curl or wget is required. Please install one of them."
-    fi
-
-    info "Extracting..."
-    mkdir -p "$install_dir"
-    tar xzf "${tmp_dir}/node.tar.gz" -C "${tmp_dir}"
-    mv "${tmp_dir}/${archive_name}"/* "$install_dir/" 2>/dev/null || true
-    rm -rf "$tmp_dir"
-
-    export PATH="${install_dir}/bin:${PATH}"
-    add_to_shell_profile "${install_dir}/bin"
-
-    success "Node.js $(node -v) installed"
-}
-
-# ============================================
-# Add to Shell Profile
-# ============================================
-add_to_shell_profile() {
-    local bin_dir="$1"
-    local profile=""
-
-    case "$(basename "${SHELL:-bash}")" in
-        bash) profile="${HOME}/.bashrc" ;;
-        zsh)  profile="${HOME}/.zshrc" ;;
-        *)    profile="${HOME}/.profile" ;;
-    esac
-
-    if [[ -n "$profile" ]] && [[ -f "$profile" ]]; then
-        if ! grep -q "$bin_dir" "$profile" 2>/dev/null; then
-            {
-                echo ""
-                echo "# Added by Qwen Code installer"
-                echo "export PATH=\"$bin_dir:\$PATH\""
-            } >> "$profile"
-            info "Added to $profile"
-        fi
-    fi
-}
-
-# ============================================
-# Install Qwen Code via npm
-# ============================================
-install_qwen_npm() {
-    local registry="${QWEN_NPM_REGISTRY:-$DEFAULT_NPM_REGISTRY}"
-
-    echo ""
-    info "Installing Qwen Code..."
-
-    local npm_prefix
-    npm_prefix=$(npm config get prefix 2>/dev/null || echo "")
-
-    local need_prefix=false
-    if [[ -z "$npm_prefix" ]] || [[ "$npm_prefix" == *"error"* ]]; then
-        need_prefix=true
-    else
-        case "$npm_prefix" in
-            /|/usr|/usr/local|/opt|/usr/local/npm)
-                need_prefix=true
-                ;;
-        esac
-    fi
-
-    if [[ "$need_prefix" == true ]]; then
-        local user_prefix="${QWEN_INSTALL_DIR:-$HOME/.qwen}/npm-global"
-        mkdir -p "$user_prefix"
-        npm config set prefix "$user_prefix"
-        export PATH="${user_prefix}/bin:${PATH}"
-        add_to_shell_profile "${user_prefix}/bin"
-    fi
-
-    if npm install -g "@qwen-code/qwen-code@latest" --registry "$registry"; then
-        echo ""
-        success "Qwen Code installed!"
-
-        if command -v qwen &>/dev/null; then
-            local qwen_version
-            qwen_version=$(qwen --version 2>/dev/null || echo "unknown")
-            success "Version: $qwen_version"
-        fi
-    else
-        error "Installation failed. Please check your internet connection and try again."
-    fi
-}
-
-# ============================================
-# macOS Installation
-# ============================================
-install_mac() {
-    info "Starting Qwen Code installation for macOS..."
-    echo ""
-
-    if [[ "${QWEN_SKIP_NODE:-false}" != "true" ]]; then
-        if check_node; then
-            success "Node.js $(node -v) already installed"
-        else
-            warn "Node.js 20+ required"
-            install_node_unix "darwin"
-        fi
-    else
-        info "Skipping Node.js installation (--skip-node)"
-        if ! check_node; then
-            error "Node.js not found. Please install Node.js 20+ or remove --skip-node flag."
-        fi
-    fi
-
-    install_qwen_npm
-}
-
-# ============================================
-# Linux Installation
-# ============================================
-install_linux() {
-    info "Starting Qwen Code installation for Linux..."
-    echo ""
-
-    if [[ "${QWEN_SKIP_NODE:-false}" != "true" ]]; then
-        if check_node; then
-            success "Node.js $(node -v) already installed"
-        else
-            warn "Node.js 20+ required"
-            install_node_unix "linux"
-        fi
-    else
-        info "Skipping Node.js installation (--skip-node)"
-        if ! check_node; then
-            error "Node.js not found. Please install Node.js 20+ or remove --skip-node flag."
-        fi
-    fi
-
-    install_qwen_npm
-}
-
-# ============================================
-# Windows Installation (via PowerShell)
+# Windows Installation
 # ============================================
 install_windows() {
-    echo ""
-    info "Windows detected, launching PowerShell installer..."
-    echo ""
-
-    # Check if PowerShell is available (WSL or Git Bash on Windows)
-    if command -v powershell.exe &>/dev/null; then
-        # Download and execute PowerShell script directly
-        local ps_script
-        ps_script=$(mktemp)
-        
-        info "Downloading PowerShell installer..."
-        if curl -fsSL "${BASE_URL}/install.ps1" -o "$ps_script"; then
-            success "Downloaded PowerShell installer"
-            echo ""
-            info "Executing in PowerShell..."
-            echo ""
-            
-            # Execute PowerShell script
-            powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$ps_script"
-            local result=$?
-            
-            rm -f "$ps_script"
-            
-            if [[ $result -eq 0 ]]; then
-                success "PowerShell installation completed!"
-            else
-                error "PowerShell installation failed with code: $result"
-            fi
-        else
-            rm -f "$ps_script"
-            error "Failed to download PowerShell installer"
-        fi
+    info "Detected Windows, running batch installer..."
+    
+    # Create temp directory
+    local temp_dir
+    if [[ -n "$TEMP" ]]; then
+        temp_dir="$TEMP"
+    elif [[ -n "$TMP" ]]; then
+        temp_dir="$TMP"
     else
-        # No PowerShell found, provide instructions
-        warn "PowerShell not found in PATH"
-        echo ""
-        echo "  Please run the following command in ${BOLD}PowerShell${NC} (as Administrator):"
-        echo ""
-        echo -e "  ${CYAN}irm ${BASE_URL}/install.ps1 | iex${NC}"
-        echo ""
-        exit 1
+        temp_dir="/tmp"
     fi
-}
-
-# ============================================
-# Interactive Platform Selection
-# ============================================
-select_platform() {
-    local detected=$(detect_platform)
-    local detected_arch=$(detect_arch)
-
-    echo ""
-    echo -e "${CYAN}╔══════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║                                                          ║${NC}"
-    echo -e "${CYAN}║           ${BOLD}🤖 Qwen Code Installer${NC}                          ${CYAN}║${NC}"
-    echo -e "${CYAN}║                                                          ║${NC}"
-    echo -e "${CYAN}╚══════════════════════════════════════════════════════════╝${NC}"
-    echo ""
-
-    if [[ "$detected" != "unknown" ]]; then
-        local platform_name
-        case "$detected" in
-            mac)     platform_name="macOS (${detected_arch})" ;;
-            linux)   platform_name="Linux (${detected_arch})" ;;
-            windows) platform_name="Windows (${detected_arch})" ;;
-        esac
-        echo -e "  ${GREEN}✓${NC} Detected: ${BOLD}${platform_name}${NC}"
-        echo ""
-    fi
-
-    echo "  Select your operating system:"
-    echo ""
-    echo -e "    ${BOLD}[1]${NC} macOS (Intel or Apple Silicon)"
-    echo -e "    ${BOLD}[2]${NC} Windows (PowerShell)"
-    echo -e "    ${BOLD}[3]${NC} Linux (x64 or ARM64)"
-    echo ""
-
-    local default_choice
-    case "$detected" in
-        mac)     default_choice=1 ;;
-        windows) default_choice=2 ;;
-        linux)   default_choice=3 ;;
-        *)       default_choice=1 ;;
-    esac
-
-    local choice=""
-    if [[ -t 0 ]]; then
-        echo -n "  Enter choice [1-3] (default: $default_choice): "
-        read -r choice </dev/tty
+    
+    local batch_file="${temp_dir}/install-qwen.bat"
+    
+    # Download batch file
+    info "Downloading Windows installer..."
+    if curl -fsSL -o "$batch_file" "${BASE_URL}/install-qwen.bat"; then
+        success "Downloaded Windows installer"
     else
-        read -r choice 2>/dev/null || true
+        error "Failed to download Windows installer"
     fi
-
-    [[ -z "$choice" ]] && choice=$default_choice
-
-    case "$choice" in
-        1|mac|macos|darwin)
-            echo ""
-            echo -e "  ${GREEN}→${NC} Selected: ${BOLD}macOS${NC}"
-            install_mac
-            ;;
-        2|win|windows)
-            echo ""
-            echo -e "  ${GREEN}→${NC} Selected: ${BOLD}Windows${NC}"
-            install_windows
-            ;;
-        3|linux)
-            echo ""
-            echo -e "  ${GREEN}→${NC} Selected: ${BOLD}Linux${NC}"
-            install_linux
-            ;;
-        *)
-            error "Invalid choice: $choice"
-            ;;
-    esac
-}
-
-# ============================================
-# Help
-# ============================================
-show_help() {
-    cat << 'EOF'
-Qwen Code Universal Installer
-
-Usage:
-  curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install | bash
-
-Options:
-  -p, --platform <name>   Specify platform (mac, windows, linux)
-  -h, --help              Show this help message
-  -v, --version           Show installer version
-  --skip-node             Skip Node.js installation
-
-Environment Variables:
-  QWEN_INSTALL_DIR    Custom installation directory (default: ~/.qwen)
-  QWEN_NODE_VERSION   Node.js version (default: 20.18.1)
-  QWEN_NPM_REGISTRY   npm registry (default: https://registry.npmmirror.com)
-
-Examples:
-  # Auto-detect platform and install
-  curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install | bash
-
-  # Force specific platform
-  curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install | bash -s -- --platform mac
-
-  # Skip Node.js installation (use system Node.js)
-  curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install | bash -s -- --skip-node
-
-Supported Platforms:
-  - macOS (Intel x64, Apple Silicon arm64)
-  - Linux (x64, arm64)
-  - Windows (via PowerShell, auto-launched from Git Bash/WSL)
-
-For more information: https://github.com/QwenLM/qwen-code
-EOF
-    exit 0
+    
+    # Check if we're in WSL and can call Windows batch
+    if command -v cmd.exe &>/dev/null; then
+        info "Executing Windows installer..."
+        echo ""
+        cmd.exe /c "$batch_file"
+    else
+        # Not in WSL, show instructions
+        echo ""
+        echo "  Please run the batch file manually:"
+        echo "  $batch_file"
+        echo ""
+        echo "  Or run in CMD:"
+        echo "  cmd.exe /c $batch_file"
+        echo ""
+    fi
 }
 
 # ============================================
 # Main
 # ============================================
 main() {
-    local platform=""
-    local skip_node=false
-
-    while [[ $# -gt 0 ]]; do
-        case "$1" in
-            -p|--platform)
-                platform="$2"
-                shift 2
-                ;;
-            -h|--help)
-                show_help
-                ;;
-            -v|--version)
-                echo "Qwen Code Installer v${INSTALLER_VERSION}"
-                exit 0
-                ;;
-            --skip-node)
-                skip_node=true
-                shift
-                ;;
-            *)
-                warn "Unknown option: $1"
-                shift
-                ;;
-        esac
-    done
-
-    export QWEN_SKIP_NODE="$skip_node"
-
-    # If platform specified, use it directly
-    if [[ -n "$platform" ]]; then
-        case "$platform" in
-            mac|macos|darwin)
-                install_mac
-                ;;
-            win|windows)
-                install_windows
-                ;;
-            linux)
-                install_linux
-                ;;
-            *)
-                error "Unknown platform: $platform. Supported: mac, windows, linux"
-                ;;
-        esac
-    else
-        # Auto-detect and run
-        local detected=$(detect_platform)
-        
-        case "$detected" in
-            mac)
-                install_mac
-                ;;
-            linux)
-                install_linux
-                ;;
-            windows)
-                install_windows
-                ;;
-            *)
-                # Unknown platform, show interactive menu
-                select_platform
-                ;;
-        esac
-    fi
-
+    local platform=$(detect_platform)
+    
     echo ""
-    echo -e "${GREEN}╔══════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║                                                          ║${NC}"
-    echo -e "${GREEN}║           ${BOLD}✅ Installation Complete!${NC}                       ${GREEN}║${NC}"
-    echo -e "${GREEN}║                                                          ║${NC}"
-    echo -e "${GREEN}╚══════════════════════════════════════════════════════════╝${NC}"
+    echo "=========================================="
+    echo "   Qwen Code Installer"
+    echo "=========================================="
     echo ""
-    echo "  To start using Qwen Code:"
-    echo ""
-    echo -e "    ${CYAN}qwen${NC}"
-    echo ""
-    echo "  If 'qwen' command is not found, restart your terminal or run:"
-    echo "    source ~/.bashrc  # or ~/.zshrc"
-    echo ""
+    info "Detecting platform..."
+    
+    case "$platform" in
+        mac|linux)
+            install_unix
+            ;;
+        windows)
+            install_windows
+            ;;
+        *)
+            error "Unsupported platform: $platform"
+            echo "Supported platforms: macOS, Linux, Windows"
+            exit 1
+            ;;
+    esac
 }
 
 main "$@"
