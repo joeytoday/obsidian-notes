@@ -1,34 +1,35 @@
 # Qwen Code 安装脚本
 
-一行命令，全平台支持：macOS、Linux、Windows。
+一个脚本，全平台通用：macOS、Linux、Windows。
 
-## 🚀 安装命令
+## 🚀 统一安装命令
 
-### macOS / Linux
+**所有系统使用同一个命令：**
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install | bash
-```
-
-### Windows
-
-**PowerShell**：
 ```powershell
-irm https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install.ps1 | iex
+powershell -Command "irm https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/run.ps1 | iex"
 ```
 
-**CMD**：
-```cmd
-curl -fsSL -o %TEMP%\install-qwen.bat https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install-qwen.bat && %TEMP%\install-qwen.bat
-```
-
-## 📋 命令对比
+### 各平台快捷命令
 
 | 系统 | 命令 |
 |------|------|
-| **macOS / Linux** | `curl -fsSL .../install \| bash` |
-| **Windows (PowerShell)** | `irm .../install.ps1 \| iex` |
-| **Windows (CMD)** | `curl -fsSL -o %TEMP%\...bat && %TEMP%\...bat` |
+| **macOS** | `irm https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/run.ps1 \| iex` |
+| **Linux** | `irm https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/run.ps1 \| iex` |
+| **Windows (PowerShell)** | `irm https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/run.ps1 \| iex` |
+| **Windows (CMD)** | `powershell -Command "irm .../run.ps1 \| iex"` |
+
+## 📋 工作原理
+
+```
+运行 PowerShell 脚本
+    ↓
+自动检测平台
+    ↓
+├── Windows → 下载并执行 install-qwen.bat
+├── macOS   → 下载并执行 install-qwen.sh
+└── Linux   → 下载并执行 install-qwen.sh
+```
 
 ## 🔧 环境变量
 
@@ -42,13 +43,21 @@ curl -fsSL -o %TEMP%\install-qwen.bat https://qwen-code-assets.oss-cn-hangzhou.a
 
 **macOS / Linux**：
 ```bash
-QWEN_INSTALL_DIR=~/.local bash -c "$(curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install)"
+$env:QWEN_INSTALL_DIR="$HOME/.local"; irm https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/run.ps1 | iex
 ```
 
 **Windows PowerShell**：
 ```powershell
-$env:QWEN_INSTALL_DIR="$HOME\.qwen"; irm https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install.ps1 | iex
+$env:QWEN_INSTALL_DIR="$HOME\.qwen"; irm https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/run.ps1 | iex
 ```
+
+## 📦 文件说明
+
+| 文件 | 说明 |
+|------|------|
+| `run.ps1` | ✨ 跨平台 PowerShell 脚本（推荐） |
+| `install.ps1` | Windows PowerShell 脚本 |
+| `install` | bash 入口脚本（Git Bash/WSL） |
 
 ## 🔗 相关链接
 
