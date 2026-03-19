@@ -6,17 +6,15 @@
 
 ### macOS / Linux
 
-在终端中运行：
-
 ```bash
 curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install | bash
 ```
 
 ### Windows
 
-**PowerShell（推荐）**：
+**PowerShell**：
 ```powershell
-irm https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install-qwen.bat | iex
+irm https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install.ps1 | iex
 ```
 
 **CMD**：
@@ -24,19 +22,13 @@ irm https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install-q
 curl -fsSL -o %TEMP%\install-qwen.bat https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install-qwen.bat && %TEMP%\install-qwen.bat
 ```
 
-**Git Bash / WSL**：
-```bash
-curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install | bash
-```
+## 📋 命令对比
 
-## 📋 命令说明
-
-| 系统 | 环境 | 命令 |
-|------|------|------|
-| macOS / Linux | Terminal | `curl -fsSL .../install | bash` |
-| Windows | PowerShell | `irm .../install-qwen.bat \| iex` |
-| Windows | CMD | `curl -fsSL -o %TEMP%\...bat && %TEMP%\...bat` |
-| Windows | Git Bash/WSL | `curl -fsSL .../install | bash` |
+| 系统 | 命令 |
+|------|------|
+| **macOS / Linux** | `curl -fsSL .../install \| bash` |
+| **Windows (PowerShell)** | `irm .../install.ps1 \| iex` |
+| **Windows (CMD)** | `curl -fsSL -o %TEMP%\...bat && %TEMP%\...bat` |
 
 ## 🔧 环境变量
 
@@ -48,9 +40,14 @@ curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwenc
 
 ### 使用示例
 
+**macOS / Linux**：
 ```bash
-# 自定义安装目录 (macOS/Linux)
 QWEN_INSTALL_DIR=~/.local bash -c "$(curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install)"
+```
+
+**Windows PowerShell**：
+```powershell
+$env:QWEN_INSTALL_DIR="$HOME\.qwen"; irm https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install.ps1 | iex
 ```
 
 ## 🔗 相关链接
