@@ -7,7 +7,7 @@
 **无论什么系统，都使用同一个命令：**
 
 ```bash
-curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install | bash
+curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install | bash
 ```
 
 脚本会：
@@ -21,22 +21,22 @@ curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/in
 
 如果直接在 **PowerShell** 中，使用：
 ```powershell
-irm https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install.ps1 | iex
+irm https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install-unified.ps1 | iex
 ```
 
 ## 📋 命令行选项
 
 ```bash
 # 显示帮助
-curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install | bash -s -- --help
+curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install | bash -s -- --help
 
 # 指定平台（跳过自动检测）
-curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install | bash -s -- --platform mac
-curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install | bash -s -- --platform windows
-curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install | bash -s -- --platform linux
+curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install | bash -s -- --platform mac
+curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install | bash -s -- --platform windows
+curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install | bash -s -- --platform linux
 
 # 跳过 Node.js 安装（使用系统已安装的 Node.js）
-curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install | bash -s -- --skip-node
+curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install | bash -s -- --skip-node
 ```
 
 ## 🔧 环境变量
@@ -51,44 +51,32 @@ curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/in
 
 ```bash
 # 自定义安装目录
-QWEN_INSTALL_DIR=~/.local bash -c "$(curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install)"
+QWEN_INSTALL_DIR=~/.local bash -c "$(curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install)"
 
 # 指定 Node.js 版本
-QWEN_NODE_VERSION=22 bash -c "$(curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install)"
+QWEN_NODE_VERSION=22 bash -c "$(curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install)"
 ```
 
-## 📦 项目结构
+## 📦 文件说明
 
 ```
 qwencode-installer/
-├── scripts/
-│   ├── install                # ✨ 统一安装脚本（推荐）
-│   ├── install-unified.ps1    # Windows PowerShell 脚本
-│   ├── setup                  # 交互式安装脚本
-│   ├── install-qwen.sh        # 原始 Linux/macOS 脚本
-│   └── install-qwen.bat       # 原始 Windows 脚本
-├── configs/
-│   ├── release.yml
-│   └── esbuild.config.js
-├── .github/
-│   └── workflows/
-│       └── test-installer.yml
-├── ANALYSIS.md
-├── DEPLOY.md
-└── README.md
+├── install                    # ✨ 统一安装脚本（推荐）
+├── install-unified.ps1        # Windows PowerShell 脚本
+└── README.md                  # 使用说明
 ```
 
 ## 🧪 本地测试
 
 ```bash
 # 测试帮助
-bash scripts/install --help
+bash qwencode-installer/install --help
 
 # 测试指定平台
-bash scripts/install --platform mac --skip-node
+bash qwencode-installer/install --platform mac --skip-node
 
 # 测试 PowerShell 脚本
-pwsh scripts/install-unified.ps1 -Help
+pwsh qwencode-installer/install-unified.ps1 -Help
 ```
 
 ## 📝 对比 opencode
@@ -98,13 +86,13 @@ opencode 的安装方式：
 curl -fsSL https://opencode.ai/install | bash
 ```
 
-我们的实现完全相同：
+我们的实现完全相同，只是 URL 不同：
 ```bash
-curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install | bash
+curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install | bash
 ```
 
 ## 🔗 相关链接
 
 - [Qwen Code GitHub](https://github.com/QwenLM/qwen-code)
 - [npm 包](https://www.npmjs.com/package/@qwen-code/qwen-code)
-- [部署文档](DEPLOY.md)
+- [本仓库](https://github.com/joeytoday/obsidian-notes)
