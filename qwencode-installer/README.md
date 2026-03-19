@@ -1,35 +1,18 @@
 # Qwen Code 安装脚本
 
-一个脚本，全平台通用：macOS、Linux、Windows。
+一行命令，全平台支持：macOS、Linux、Windows。
 
 ## 🚀 统一安装命令
 
 **所有系统使用同一个命令：**
 
-```powershell
-powershell -Command "irm https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/run.ps1 | iex"
+```bash
+curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install | bash
 ```
 
-### 各平台快捷命令
-
-| 系统 | 命令 |
-|------|------|
-| **macOS** | `irm https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/run.ps1 \| iex` |
-| **Linux** | `irm https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/run.ps1 \| iex` |
-| **Windows (PowerShell)** | `irm https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/run.ps1 \| iex` |
-| **Windows (CMD)** | `powershell -Command "irm .../run.ps1 \| iex"` |
-
-## 📋 工作原理
-
-```
-运行 PowerShell 脚本
-    ↓
-自动检测平台
-    ↓
-├── Windows → 下载并执行 install-qwen.bat
-├── macOS   → 下载并执行 install-qwen.sh
-└── Linux   → 下载并执行 install-qwen.sh
-```
+脚本会自动检测系统并执行对应的安装程序：
+- **macOS / Linux**: 执行 `install-qwen.sh`
+- **Windows**: 执行 `install-qwen.bat`
 
 ## 🔧 环境变量
 
@@ -41,23 +24,10 @@ powershell -Command "irm https://raw.githubusercontent.com/joeytoday/obsidian-no
 
 ### 使用示例
 
-**macOS / Linux**：
 ```bash
-$env:QWEN_INSTALL_DIR="$HOME/.local"; irm https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/run.ps1 | iex
+# 自定义安装目录
+QWEN_INSTALL_DIR=~/.local bash -c "$(curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install)"
 ```
-
-**Windows PowerShell**：
-```powershell
-$env:QWEN_INSTALL_DIR="$HOME\.qwen"; irm https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/run.ps1 | iex
-```
-
-## 📦 文件说明
-
-| 文件 | 说明 |
-|------|------|
-| `run.ps1` | ✨ 跨平台 PowerShell 脚本（推荐） |
-| `install.ps1` | Windows PowerShell 脚本 |
-| `install` | bash 入口脚本（Git Bash/WSL） |
 
 ## 🔗 相关链接
 
