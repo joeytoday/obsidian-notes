@@ -21,7 +21,8 @@ case "$platform" in
         ;;
     MINGW*|MSYS*|CYGWIN*)
         echo "ℹ️  Windows detected, running batch installer..."
-        cmd.exe /c "curl -fsSL -o %TEMP%\install-qwen.bat ${BASE_URL}/install-qwen.bat && %TEMP%\install-qwen.bat"
+        # Download and execute batch file using PowerShell (more reliable on Windows)
+        powershell.exe -Command "irm '${BASE_URL}/install-qwen.bat' -o '\$env:TEMP\install-qwen.bat'; & '\$env:TEMP\install-qwen.bat'"
         ;;
     *)
         echo "❌ Unsupported platform: $platform"
