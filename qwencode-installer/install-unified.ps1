@@ -3,8 +3,8 @@
 # PowerShell script for Windows 10/11
 #
 # Usage:
-#   irm https://qwen.ai/install.ps1 | iex
-#   irm https://qwen.ai/install.ps1 | iex; qwen
+#   irm https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install.ps1 | iex
+#   curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install | bash  (from Git Bash/WSL)
 #
 # Environment variables:
 #   $env:QWEN_INSTALL_DIR    - Custom installation directory (default: ~\.qwen)
@@ -19,6 +19,7 @@ $ProgressPreference = "SilentlyContinue"
 $DefaultNodeVersion = "20.18.1"
 $DefaultNpmRegistry = "https://registry.npmmirror.com"
 $InstallerVersion = "1.0.0"
+$BaseUrl = "https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation"
 
 # Logging functions
 function Write-Info($msg) { Write-Host "ℹ️  $msg" -ForegroundColor Blue }
