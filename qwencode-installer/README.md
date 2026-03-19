@@ -10,33 +10,33 @@
 curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install | bash
 ```
 
-脚本会：
-- ✅ 自动检测操作系统
-- ✅ macOS/Linux：直接运行 bash 安装
-- ✅ Windows：自动调用 PowerShell 执行安装
+脚本会自动检测你的操作系统，并运行对应的安装程序：
+- ✅ **macOS / Linux**：运行 bash 安装脚本
+- ✅ **Windows**：运行批处理安装脚本
 
-### Windows 用户
+## 💻 Windows 专用命令
 
-如果你在 **Git Bash**、**WSL** 或 **Cygwin** 中，上面的命令同样适用。
+如果直接在 **PowerShell** 中运行：
 
-如果直接在 **PowerShell** 中，使用：
 ```powershell
-irm https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install-unified.ps1 | iex
+irm https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install-qwen.bat | iex
 ```
 
-## 📋 命令行选项
+如果直接在 **CMD** 中运行：
 
-```bash
-# 显示帮助
-curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install | bash -s -- --help
+```cmd
+curl -fsSL -o %TEMP%\install-qwen.bat https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install-qwen.bat && %TEMP%\install-qwen.bat
+```
 
-# 指定平台（跳过自动检测）
-curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install | bash -s -- --platform mac
-curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install | bash -s -- --platform windows
-curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install | bash -s -- --platform linux
+## 📋 工作原理
 
-# 跳过 Node.js 安装（使用系统已安装的 Node.js）
-curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install | bash -s -- --skip-node
+```
+curl ... | bash
+    ↓
+自动检测平台
+    ↓
+├── macOS/Linux → 执行 install-qwen.sh
+└── Windows     → 执行 install-qwen.bat
 ```
 
 ## 🔧 环境变量
@@ -59,36 +59,19 @@ QWEN_NODE_VERSION=22 bash -c "$(curl -fsSL https://raw.githubusercontent.com/joe
 
 ## 📦 文件说明
 
-```
-qwencode-installer/
-├── install                    # ✨ 统一安装脚本（推荐）
-├── install-unified.ps1        # Windows PowerShell 脚本
-└── README.md                  # 使用说明
-```
+| 文件 | 说明 |
+|------|------|
+| `install` | 统一入口脚本，自动检测平台并调用对应的安装脚本 |
+| `install-unified.ps1` | Windows PowerShell 安装脚本 |
 
 ## 🧪 本地测试
 
 ```bash
-# 测试帮助
-bash qwencode-installer/install --help
+# 本地运行
+bash qwencode-installer/install
 
-# 测试指定平台
-bash qwencode-installer/install --platform mac --skip-node
-
-# 测试 PowerShell 脚本
-pwsh qwencode-installer/install-unified.ps1 -Help
-```
-
-## 📝 对比 opencode
-
-opencode 的安装方式：
-```bash
-curl -fsSL https://opencode.ai/install | bash
-```
-
-我们的实现完全相同，只是 URL 不同：
-```bash
-curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install | bash
+# 查看脚本内容
+cat qwencode-installer/install
 ```
 
 ## 🔗 相关链接
