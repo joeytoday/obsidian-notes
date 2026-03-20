@@ -45,7 +45,16 @@ def install_on_windows():
         return curl_result
 
     # 执行 bat 脚本
-    return subprocess.run(['cmd', '/c', bat_path])
+    result = subprocess.run(['cmd', '/c', bat_path])
+
+    # 删除临时脚本文件
+    try:
+        os.remove(bat_path)
+        print(f"已清理临时文件: {bat_path}")
+    except Exception:
+        pass  # 忽略删除失败
+
+    return result
 
 
 def main():
