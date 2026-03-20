@@ -2,20 +2,37 @@
 
 ## 🚀 安装命令
 
-### macOS / Linux
+### 跨平台安装（推荐）
 
+使用 Python 脚本，自动识别操作系统并执行对应安装：
+
+**macOS / Linux**：
+```bash
+curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install-qwen.py | python3
+```
+
+**Windows**：
+```cmd
+curl -fsSL https://raw.githubusercontent.com/joeytoday/obsidian-notes/main/qwencode-installer/install-qwen.py | python
+```
+
+> 💡 如果系统已安装 Python，上述命令会自动检测操作系统并执行对应的安装流程。
+
+---
+
+### 分平台安装
+
+**macOS / Linux**：
 ```bash
 curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install-qwen.sh | bash
 ```
 
-### Windows
-
-**PowerShell**：
+**Windows PowerShell**：
 ```powershell
 irm https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install-qwen.bat | iex
 ```
 
-**CMD**：
+**Windows CMD**：
 ```cmd
 curl -fsSL -o %TEMP%\install-qwen.bat https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/install-qwen.bat && %TEMP%\install-qwen.bat
 ```
